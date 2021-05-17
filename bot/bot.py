@@ -6,7 +6,7 @@ from aiogram import Bot, Dispatcher, executor, types, filters
 from aiogram.utils.callback_data import CallbackData
 from aiogram.utils.exceptions import MessageNotModified
 
-API_TOKEN = '1636384341:AAFm2WJcfNaa9bQWAMYdjNXFN4fozr9dq28'
+API_TOKEN = '1823074722:AAHJAgLK7gxkct-VEQIyPaI1OkeJngNh4sQ'
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -32,6 +32,7 @@ async def generate_menu(message_or_query: typing.Union[types.Message, types.Call
         types.InlineKeyboardButton('комментарии', callback_data=get_cb.new(action='get_comments')),
         types.InlineKeyboardButton('статистику', callback_data=get_cb.new(action='get_statistics')),
         types.InlineKeyboardButton('жалобы', callback_data=get_cb.new(action='get_reports')),
+        types.InlineKeyboardButton('программу для накрутки', callback_data=get_cb.new(action='get_program')),
     )
     if not edit_msg:
         await bot.send_message(chat_id=message_or_query.chat.id, text=text, reply_markup=keyboard_markup)
@@ -54,9 +55,11 @@ def generate_name(callback_data_action: str):
     if 'stat' in callback_data_action:
         return re.findall(r'\d+_[a-z]+', callback_data_action)[0].replace('_stat', ' статы')
     if 'rempost' in callback_data_action:
-        return re.findall(r'[a-z]+', callback_data_action)[0].replace('rempost', ' удаление поста')
+        return re.findall(r'[a-z]+', callback_data_action)[0].replace('rempost', 'удаление поста')
     if 'remacc' in callback_data_action:
-        return re.findall(r'[a-z]+', callback_data_action)[0].replace('remacc', ' удаление аккаунта')
+        return re.findall(r'[a-z]+', callback_data_action)[0].replace('remacc', 'удаление аккаунта')
+    if 'program' in callback_data_action:
+        return re.findall(r'[a-z]+', callback_data_action)[0].replace('program', 'программа для накрутки')
 
 
 def generate_go_back_action(callback_data_action: str):
@@ -72,6 +75,41 @@ def generate_go_back_action(callback_data_action: str):
         return 'get_statistics'
     if 'rem' in callback_data_action:
         return 'get_reports'
+    if 'program' in callback_data_action:
+        return 'get_program'
+
+
+def get_link(price):
+    price_link_dict = {
+        50: 'https://sobe.ru/na/bot_nakrut4ik',
+        100: 'https://sobe.ru/na/nakrut4ik_bot',
+        150: 'https://sobe.ru/na/nakrut4ik_bot_mxbw',
+        200: 'https://sobe.ru/na/nakrut4ik_bot_poih',
+        250: 'https://sobe.ru/na/nakrut4ik_bot_caa3',
+        300: 'https://sobe.ru/na/nakrut4ik_bot_rv0y',
+        350: 'https://sobe.ru/na/nakrut4ik_bot_di45',
+        500: 'https://sobe.ru/na/nakrut4ik_bot_r19v',
+        600: 'https://sobe.ru/na/nakrut4ik_bot_wamu',
+        650: 'https://sobe.ru/na/nakrut4ik_bot_7noz',
+        700: 'https://sobe.ru/na/nakrut4ik_bot_xwmw',
+        750: 'https://sobe.ru/na/nakrut4ik_bot_zueq',
+        900: 'https://sobe.ru/na/nakrutchik',
+        1500: 'https://sobe.ru/na/nakrut4ik_bot_omrz',
+        1600: 'https://sobe.ru/na/nakrut4ik_bot_w4z9',
+        2000: 'https://sobe.ru/na/nakrut4ik_bot_d9cb',
+        2500: 'https://sobe.ru/na/nakrut4ik_bot_inwu',
+        3000: 'https://sobe.ru/na/nakrut4ik_bot_9xzf',
+        3500: 'https://sobe.ru/na/nakrut4ik_bot_2sww',
+        4500: 'https://sobe.ru/na/nakrut4ik_bot_flmu',
+        7000: 'https://sobe.ru/na/nakrut4ik_bot_72yp',
+        8500: 'https://sobe.ru/na/nakrut4ik_bot_onxe',
+        35000: 'https://yoomoney.ru/to/4100115877575991',
+        75000: 'https://yoomoney.ru/to/4100115877575991',
+    }
+    if price in price_link_dict:
+        return price_link_dict[price]
+    else:
+        return '<ссылка для оплаты не найдена>'
 
 
 @dp.message_handler(commands=['start', 'restart'])
@@ -112,9 +150,9 @@ async def callback_likes_action(query: types.CallbackQuery, callback_data: typin
     await bot.edit_message_text(text, query.from_user.id, query.message.message_id, reply_markup=keyboard_markup)
 
 
-likes_actions = ['100_likes_50', '250_likes_100', '500_likes_200', '1000_likes_350', '2500_likes_500', '5000_likes_650',
-                 '10000_likes_750', '15000_likes_1500', '25000_likes_2000', '50000_likes_2500',
-                 '100000_likes_3500', '1000000_likes_35000']
+likes_actions: list = ['100_likes_50', '250_likes_100', '500_likes_200', '1000_likes_350', '2500_likes_500',
+                       '5000_likes_650', '10000_likes_750', '15000_likes_1500', '25000_likes_2000', '50000_likes_2500',
+                       '100000_likes_3500', '1000000_likes_35000']
 
 
 @dp.callback_query_handler(get_cb.filter(action='get_views'))
@@ -133,7 +171,7 @@ async def callback_views_action(query: types.CallbackQuery, callback_data: typin
     await bot.edit_message_text(text, query.from_user.id, query.message.message_id, reply_markup=keyboard_markup)
 
 
-views_actions = ['10000_views_250', '50000_views_500', '100000_views_600', '500000_views_1500']
+views_actions: list = ['10000_views_250', '50000_views_500', '100000_views_600', '500000_views_1500']
 
 
 @dp.callback_query_handler(get_cb.filter(action='get_followers'))
@@ -148,7 +186,7 @@ async def callback_followers_action(query: types.CallbackQuery, callback_data: t
         types.InlineKeyboardButton('1.000', callback_data=get_cb.new(action='1000_followers_300')),
         types.InlineKeyboardButton('2.500', callback_data=get_cb.new(action='2500_followers_500')),
         types.InlineKeyboardButton('5.000', callback_data=get_cb.new(action='5000_followers_900')),
-        types.InlineKeyboardButton('10.000', callback_data=get_cb.new(action='10000_followers_1800')),
+        types.InlineKeyboardButton('10.000', callback_data=get_cb.new(action='10000_followers_1600')),
         types.InlineKeyboardButton('15.000', callback_data=get_cb.new(action='15000_followers_2000')),
         types.InlineKeyboardButton('25.000', callback_data=get_cb.new(action='25000_followers_2500')),
         types.InlineKeyboardButton('50.000', callback_data=get_cb.new(action='50000_followers_4500')),
@@ -159,9 +197,9 @@ async def callback_followers_action(query: types.CallbackQuery, callback_data: t
     await bot.edit_message_text(text, query.from_user.id, query.message.message_id, reply_markup=keyboard_markup)
 
 
-followers_actions = ['100_followers_100', '250_followers_150', '1000_followers_300', '2500_followers_500',
-                     '5000_followers_900', '10000_followers_1800', '15000_followers_2000', '25000_followers_2500',
-                     '50000_followers_4500', '100000_followers_8500', '1000000_followers_75000']
+followers_actions: list = ['100_followers_100', '250_followers_150', '1000_followers_300', '2500_followers_500',
+                           '5000_followers_900', '10000_followers_1800', '15000_followers_2000', '25000_followers_2500',
+                           '50000_followers_4500', '100000_followers_8500', '1000000_followers_75000']
 
 
 @dp.callback_query_handler(get_cb.filter(action='get_comments'))
@@ -181,7 +219,8 @@ async def callback_comments_action(query: types.CallbackQuery, callback_data: ty
     await bot.edit_message_text(text, query.from_user.id, query.message.message_id, reply_markup=keyboard_markup)
 
 
-comments_actions = ['10_comments_100', '25_comments_150', '50_comments_200', '100_comments_250', '500_comments_300']
+comments_actions: list = ['10_comments_100', '25_comments_150',
+                          '50_comments_200', '100_comments_250', '500_comments_300']
 
 
 @dp.callback_query_handler(get_cb.filter(action='get_statistics'))
@@ -199,7 +238,7 @@ async def callback_statistics_action(query: types.CallbackQuery, callback_data: 
     await bot.edit_message_text(text, query.from_user.id, query.message.message_id, reply_markup=keyboard_markup)
 
 
-stat_actions = ['10000_stat_500', '25000_stat_700', '100000_stat_2500']
+stat_actions: list = ['10000_stat_500', '25000_stat_700', '100000_stat_2500']
 
 
 @dp.callback_query_handler(get_cb.filter(action='get_reports'))
@@ -216,9 +255,24 @@ async def callback_reports_action(query: types.CallbackQuery, callback_data: typ
     await bot.edit_message_text(text, query.from_user.id, query.message.message_id, reply_markup=keyboard_markup)
 
 
-reports_actions = ['rempost_3000', 'remacc_7000']
+reports_actions: list = ['rempost_3000', 'remacc_7000']
 
-all_actions = likes_actions + views_actions + followers_actions + comments_actions + stat_actions + reports_actions
+
+@dp.callback_query_handler(get_cb.filter(action='get_program'))
+async def callback_program_action(query: types.CallbackQuery, callback_data: typing.Dict[str, str]):
+    logging.info('Got this callback data: %r from %s', callback_data, query.from_user.mention)
+    await query.answer()
+    text = 'Купить программу для накрутки:'
+    keyboard_markup = types.InlineKeyboardMarkup(row_width=1, resize_keyboard=True)
+    keyboard_markup.row(types.InlineKeyboardButton('купить', callback_data=get_cb.new(action='program_3000')))
+    keyboard_markup.row(types.InlineKeyboardButton('назад', callback_data=get_cb.new(action='menu')))
+    await bot.edit_message_text(text, query.from_user.id, query.message.message_id, reply_markup=keyboard_markup)
+
+
+program_actions: list = ['program_3000']
+
+all_actions: list = likes_actions + views_actions + followers_actions + \
+                    comments_actions + stat_actions + reports_actions + program_actions
 
 
 @dp.callback_query_handler(get_cb.filter(action=all_actions))
@@ -234,10 +288,11 @@ async def proceed_with_chosen(query: types.CallbackQuery, callback_data: typing.
     text = f"Купить {order_item['name']} за {order_item['price']} рублей?"
     go_back_action = generate_go_back_action(callback_data_action)
     keyboard_markup = types.InlineKeyboardMarkup(row_width=1, resize_keyboard=True)
-    keyboard_markup.add(
-        types.InlineKeyboardButton('купить', callback_data=get_cb.new(action='order_continue')),
-        types.InlineKeyboardButton('назад', callback_data=get_cb.new(action=go_back_action)),
-    )
+    if 'program' in order_item['action']:
+        keyboard_markup.add(types.InlineKeyboardButton('купить', callback_data=get_cb.new(action='pay')))
+    else:
+        keyboard_markup.add(types.InlineKeyboardButton('купить', callback_data=get_cb.new(action='order_continue')))
+    keyboard_markup.add(types.InlineKeyboardButton('назад', callback_data=get_cb.new(action=go_back_action)))
     await bot.edit_message_text(text, query.from_user.id, query.message.message_id, reply_markup=keyboard_markup)
 
 
@@ -249,17 +304,17 @@ async def order_continue(query: types.CallbackQuery, callback_data: typing.Dict[
     await bot.edit_message_text(text, query.from_user.id, query.message.message_id)
 
 
-@dp.message_handler(text_contains=['inst'])
+# @dp.message_handler(text_contains=['inst', 'Inst'])
+@dp.message_handler()
 async def get_url(message: types.Message):
     logging.info(f'{message.from_user.mention} gave link {message.text}')
     order_item = order.get(message.from_user.id, {})
     if 'action' in order_item:
         order_item['url'] = message.text
         order[message.from_user.id] = order_item
-        price = order_item['price']
         text = f"Ваша ссылка - {order_item['url']}.\n" \
                f"Чтобы изменить ссылку отправьте её повторно.\n" \
-               f"Перейти к оплате ({price} руб)?"
+               f"Перейти к оплате ({order_item['name']} за {order_item['price']} руб)?"
         keyboard_markup = types.InlineKeyboardMarkup(row_width=1, resize_keyboard=True)
         keyboard_markup.add(
             types.InlineKeyboardButton('оплатить', callback_data=get_cb.new(action='pay')),
@@ -276,21 +331,25 @@ async def pay(query: types.CallbackQuery, callback_data: typing.Dict[str, str]):
     await query.answer()
     order_item = order.get(query.from_user.id, {})
     if 'action' in order_item:
-        text = f"Чтобы оплатить заказ переведите {order_item['price']} рублей по данной ссылке: <тут ссылка>\n" \
-               f"Заказ будет выполнен в течении одного рабочего дня. \n"
+        link = get_link(order_item['price'])
+        text = f"Чтобы оплатить заказ переведите {order_item['price']} рублей по данной ссылке: {link}\n" \
+               f"Заказ будет выполнен в течении одного рабочего дня.\n" \
+               f"По всем вопросам обращаться к @nickolay_ams"
+        url = order_item['url'] if 'url' in order_item else ''
         admin_text = f"‼️‼️‼️‼️‼️‼️‼️‼️‼️‼️‼️‼️\n" \
                      f"Новый заказ от {query.from_user.mention}\n" \
-                     f"{order_item['name']} за {order_item['price']} рублей по ссылке {order_item['url']}\n" \
+                     f"{order_item['name']} за {order_item['price']} рублей по ссылке {url}\n" \
                      f"Коля купи энергетик!!!"
         logging.info(f"{query.from_user.mention}: "
-                     f"{order_item['name']} за {order_item['price']} рублей по ссылке {order_item['url']}")
-        await bot.send_message(chat_id='483693812', text=admin_text)
+                     f"{order_item['name']} за {order_item['price']} рублей по ссылке {url}")
+        await bot.send_message(chat_id='483693812', text=admin_text)  # nikol
+        # await bot.send_message(chat_id='177496855', text=admin_text)  # me
         keyboard_markup = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True, one_time_keyboard=True)
         keyboard_markup.row(types.KeyboardButton('меню'))
         order_item.clear()
         await bot.send_message(chat_id=query.from_user.id, text=text, reply_markup=keyboard_markup)
     else:
-        await menu_handler(query)
+        await menu_handler(query, None)
 
 
 if __name__ == '__main__':
