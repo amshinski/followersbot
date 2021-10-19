@@ -334,7 +334,7 @@ async def pay(query: types.CallbackQuery, callback_data: typing.Dict[str, str]):
         link = get_link(order_item['price'])
         text = f"Чтобы оплатить заказ переведите {order_item['price']} рублей по данной ссылке: {link}\n" \
                f"Заказ будет выполнен в течении одного рабочего дня.\n" \
-               f"По всем вопросам обращаться к @nickolay_ams"
+               f"По всем вопросам обращаться к @flwrss"
         url = order_item['url'] if 'url' in order_item else ''
         admin_text = f"‼️‼️‼️‼️‼️‼️‼️‼️‼️‼️‼️‼️\n" \
                      f"Новый заказ от {query.from_user.mention}\n" \
